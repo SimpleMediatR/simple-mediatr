@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/SimpleMediatR/SimpleMediatR.csproj" Id="91a045c9-5f72-4240-81aa-856d6835980a" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/SimpleMediatR.Tests/SimpleMediatR.Tests.csproj" Id="9c68ee16-cbb0-4bcc-b15f-c179a4eba6f8" />
+  </Folder>
+</Solution>
