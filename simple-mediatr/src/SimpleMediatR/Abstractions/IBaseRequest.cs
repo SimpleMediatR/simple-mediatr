@@ -1,4 +1,4 @@
-namespace SimpleMediatR.Abstractions;
+namespace SimpleMediatR;
 
 /// <summary>
 /// Represents the base contract for all requests.
