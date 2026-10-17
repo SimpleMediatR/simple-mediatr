@@ -1,7 +1,3 @@
-
-
-using SimpleMediatR.Abstractions;
-
 namespace SimpleMediatR.Tests.Abstractions;
 
 public sealed class RequestTests
@@ -29,7 +25,7 @@ public sealed class RequestTests
         var request = new TestGenericRequest();
 
         // Act
-        bool isBaseRequest = request is IBaseRequest;
+        var isBaseRequest = request is IBaseRequest;
 
         // Assert
         Assert.True(isBaseRequest);

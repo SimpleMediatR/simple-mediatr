@@ -1,6 +1,3 @@
-
-using SimpleMediatR.Abstractions;
-
 namespace SimpleMediatR;
 
 /// <summary>
