@@ -21,8 +21,8 @@ jobs:
       with:
         dotnet-version: 10.0.x
     - name: Restore dependencies
-      run: dotnet restore ./simple-mediatr.slnx
+      run: dotnet restore ./simple-mediatr/simple-mediatr.slnx
     - name: Build
-      run: dotnet build ./simple-mediatr.slnx --no-restore
+      run: dotnet build ./simple-mediatr/simple-mediatr.slnx --no-restore
     - name: Test
-      run: dotnet test ./simple-mediatr.slnx --no-build --verbosity normal
+      run: dotnet test ./simple-mediatr/simple-mediatr.slnx --no-build --verbosity normal
