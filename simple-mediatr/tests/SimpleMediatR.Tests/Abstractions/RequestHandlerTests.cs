@@ -1,3 +1,4 @@
+
 namespace SimpleMediatR.Tests.Abstractions;
 
 public sealed class RequestHandlerTests
@@ -16,21 +17,8 @@ public sealed class RequestHandlerTests
         Assert.True(handler.WasHandled);
     }
 
-    private sealed record TestCommand : IRequest;
-
-    private sealed class TestCommandHandler : IRequestHandler<TestCommand>
-    {
-        public bool WasHandled { get; private set; }
-
-        public Task Handle(TestCommand request, CancellationToken cancellationToken)
-        {
-            WasHandled = true;
-            return Task.CompletedTask;
-        }
-    }
-
     [Fact]
-    public async Task GenericHandlerShouldReturnExpectedResponse()
+    public async Task GenericHandlerShouldReturnExpectedResponseAsync()
     {
         // Arrange
         var handler = new TestQueryHandler();
@@ -43,10 +31,29 @@ public sealed class RequestHandlerTests
         Assert.Equal("Hello SimpleMediatR", result);
     }
 
+    private sealed record TestCommand : IRequest;
+
     private sealed record TestQuery : IRequest<string>;
+
+    private sealed class TestCommandHandler : IRequestHandler<TestCommand>
+    {
+        public bool WasHandled { get; private set; }
+
+        public Task Handle(
+            TestCommand request,
+            CancellationToken cancellationToken)
+        {
+            WasHandled = true;
+
+            return Task.CompletedTask;
+        }
+    }
 
     private sealed class TestQueryHandler : IRequestHandler<TestQuery, string>
     {
-        public Task<string> Handle(TestQuery request, CancellationToken cancellationToken) => Task.FromResult("Hello SimpleMediatR");
+        public Task<string> Handle(
+            TestQuery request,
+            CancellationToken cancellationToken)
+            => Task.FromResult("Hello SimpleMediatR");
     }
 }

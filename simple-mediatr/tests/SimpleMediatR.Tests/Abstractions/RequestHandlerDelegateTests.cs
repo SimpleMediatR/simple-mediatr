@@ -5,7 +5,6 @@ namespace SimpleMediatR.Tests.Abstractions;
 
 public sealed class RequestHandlerDelegateTests
 {
-
     [Fact]
     public async Task DelegateShouldReturnExpectedResponseAsync()
     {
@@ -18,16 +17,17 @@ public sealed class RequestHandlerDelegateTests
         // Assert
         Assert.Equal("Hello SimpleMediatR", result);
 
-        static Task<string> HandleRequest(CancellationToken cancellationToken = default)
+        static Task<string> HandleRequest(
+            CancellationToken cancellationToken = default)
             => Task.FromResult("Hello SimpleMediatR");
     }
-
 
     [Fact]
     public async Task DelegateShouldReceiveCancellationTokenAsync()
     {
         // Arrange
         using var cancellationTokenSource = new CancellationTokenSource();
+
         CancellationToken expectedToken = cancellationTokenSource.Token;
         CancellationToken receivedToken = default;
 
@@ -39,13 +39,14 @@ public sealed class RequestHandlerDelegateTests
         // Assert
         Assert.Equal(expectedToken, receivedToken);
 
-        Task<string> HandleRequest(CancellationToken cancellationToken = default)
+        Task<string> HandleRequest(
+            CancellationToken cancellationToken = default)
         {
             receivedToken = cancellationToken;
+
             return Task.FromResult("Hello SimpleMediatR");
         }
     }
-
 
     [Fact]
     public async Task DelegateShouldWorkInGenericPipelineAsync()
@@ -54,16 +55,17 @@ public sealed class RequestHandlerDelegateTests
         RequestHandlerDelegate<string> next = HandleRequest;
 
         // Act
-        var result = await ExecutePipelineAsync(next);
+        string result = await ExecutePipelineAsync(next);
 
         // Assert
         Assert.Equal("Hello SimpleMediatR", result);
 
-        static Task<string> HandleRequest(CancellationToken cancellationToken = default)
+        static Task<string> HandleRequest(
+            CancellationToken cancellationToken = default)
             => Task.FromResult("Hello SimpleMediatR");
     }
 
     private static async Task<TResponse> ExecutePipelineAsync<TResponse>(
-        RequestHandlerDelegate<TResponse> next) => await next();
-
+        RequestHandlerDelegate<TResponse> next)
+        => await next();
 }

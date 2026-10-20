@@ -1,3 +1,4 @@
+
 namespace SimpleMediatR.Tests.Abstractions;
 
 public sealed class RequestTests
@@ -15,11 +16,8 @@ public sealed class RequestTests
         Assert.True(isBaseRequest);
     }
 
-    private sealed record TestRequest : IRequest;
-
-
     [Fact]
-    public void GenericRequestSShouldImplementIBaseRequest()
+    public void GenericRequestShouldImplementIBaseRequest()
     {
         // Arrange
         var request = new TestGenericRequest();
@@ -30,8 +28,6 @@ public sealed class RequestTests
         // Assert
         Assert.True(isBaseRequest);
     }
-
-    private sealed record TestGenericRequest : IRequest<string>;
 
     [Fact]
     public void GenericRequestShouldSupportCovariance()
@@ -45,4 +41,8 @@ public sealed class RequestTests
         // Assert
         Assert.Same(request, generalRequest);
     }
+
+    private sealed record TestRequest : IRequest;
+
+    private sealed record TestGenericRequest : IRequest<string>;
 }
