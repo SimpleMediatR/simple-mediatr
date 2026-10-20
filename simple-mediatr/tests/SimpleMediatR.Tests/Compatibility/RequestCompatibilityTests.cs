@@ -1,6 +1,4 @@
 
-using SimpleMediatR;
-
 namespace SimpleMediatR.Tests.Compatibility;
 
 public sealed class RequestCompatibilityTests
@@ -18,11 +16,6 @@ public sealed class RequestCompatibilityTests
         Assert.IsType<GetUserQuery>(baseRequest);
     }
 
-    private sealed record GetUserQuery(Guid UserId) : IRequest<UserDto>;
-
-    private sealed record UserDto(Guid Id, string Name);
-
-
     [Fact]
     public void NonGenericRequestShouldImplementIBaseRequest()
     {
@@ -36,9 +29,6 @@ public sealed class RequestCompatibilityTests
         Assert.IsType<DeleteUserCommand>(baseRequest);
     }
 
-    private sealed record DeleteUserCommand(Guid UserId) : IRequest;
-
-
     [Fact]
     public async Task GenericHandlerShouldReturnExpectedResponseAsync()
     {
@@ -47,25 +37,11 @@ public sealed class RequestCompatibilityTests
         var request = new GetUserQuery(Guid.NewGuid());
 
         // Act
-        UserDto result = await handler.Handle(request, CancellationToken.None);
+        var result = await handler.Handle(request, CancellationToken.None);
 
         // Assert
         Assert.Equal(request.UserId, result.Id);
     }
-
-
-    private sealed class GetUserQueryHandler
-        : IRequestHandler<GetUserQuery, UserDto>
-    {
-        public Task<UserDto> Handle(
-            GetUserQuery request,
-            CancellationToken cancellationToken)
-        {
-            UserDto user = new(request.UserId, "Test User");
-            return Task.FromResult(user);
-        }
-    }
-
 
     [Fact]
     public async Task NonGenericHandlerShouldHandleCommandAsync()
@@ -81,22 +57,6 @@ public sealed class RequestCompatibilityTests
         Assert.Equal(request.UserId, handler.DeletedUserId);
     }
 
-
-    private sealed class DeleteUserCommandHandler
-        : IRequestHandler<DeleteUserCommand>
-    {
-        public Guid? DeletedUserId { get; private set; }
-
-        public Task Handle(
-            DeleteUserCommand request,
-            CancellationToken cancellationToken)
-        {
-            DeletedUserId = request.UserId;
-            return Task.CompletedTask;
-        }
-    }
-
-
     [Fact]
     public void SenderShouldSupportGenericRequest()
     {
@@ -110,7 +70,6 @@ public sealed class RequestCompatibilityTests
         // Assert
         Assert.NotNull(send);
     }
-
 
     [Fact]
     public void SenderShouldSupportNonGenericRequest()
@@ -126,7 +85,6 @@ public sealed class RequestCompatibilityTests
         Assert.NotNull(send);
     }
 
-
     [Fact]
     public async Task PipelineDelegateShouldSupportContinuationAsync()
     {
@@ -134,16 +92,49 @@ public sealed class RequestCompatibilityTests
         RequestHandlerDelegate<UserDto> next = HandleRequest;
 
         // Act
-        UserDto result = await ExecutePipelineAsync(next);
+        var result = await ExecutePipelineAsync(next);
 
         // Assert
         Assert.Equal("Test User", result.Name);
-
-        static Task<UserDto> HandleRequest(
-            CancellationToken cancellationToken = default)
-            => Task.FromResult(new UserDto(Guid.NewGuid(), "Test User"));
     }
 
+    private sealed record GetUserQuery(Guid UserId) : IRequest<UserDto>;
+
+    private sealed record UserDto(Guid Id, string Name);
+
+    private sealed record DeleteUserCommand(Guid UserId) : IRequest;
+
+    private sealed class GetUserQueryHandler
+        : IRequestHandler<GetUserQuery, UserDto>
+    {
+        public Task<UserDto> Handle(
+            GetUserQuery request,
+            CancellationToken cancellationToken)
+            => Task.FromResult(
+                new UserDto(request.UserId, "Test User"));
+    }
+
+    private sealed class DeleteUserCommandHandler
+        : IRequestHandler<DeleteUserCommand>
+    {
+        public Guid? DeletedUserId { get; private set; }
+
+        public Task Handle(
+            DeleteUserCommand request,
+            CancellationToken cancellationToken)
+        {
+            DeletedUserId = request.UserId;
+
+            return Task.CompletedTask;
+        }
+    }
+
+    private static Task<UserDto> HandleRequest(
+        CancellationToken cancellationToken = default)
+        => Task.FromResult(
+            new UserDto(Guid.NewGuid(), "Test User"));
+
     private static async Task<TResponse> ExecutePipelineAsync<TResponse>(
-        RequestHandlerDelegate<TResponse> next) => await next();
+        RequestHandlerDelegate<TResponse> next)
+        => await next();
 }

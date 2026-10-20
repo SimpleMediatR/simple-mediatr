@@ -1,9 +1,8 @@
+
 namespace SimpleMediatR.Tests.Abstractions;
 
 public sealed class SenderTests
 {
-    public object? ObjectResponse { get; set; } = "Hello SimpleMediatR";
-
     [Fact]
     public async Task SendWithResponseShouldReturnExpectedResultAsync()
     {
@@ -15,49 +14,22 @@ public sealed class SenderTests
         var result = await sender.Send(request);
 
         // Assert
-        Assert.Equal(ObjectResponse, result);
+        Assert.Equal("Hello SimpleMediatR", result);
     }
-
-    private sealed record TestQuery : IRequest<string>;
-
-    private sealed class TestSender : ISender
-    {
-        public CancellationToken ReceivedToken { get; private set; }
-
-        public Task<TResponse> Send<TResponse>(
-            IRequest<TResponse> request,
-            CancellationToken cancellationToken = default) => Task.FromResult((TResponse)(object)"Hello SimpleMediatR");
-
-        public Task Send<TRequest>(
-        TRequest request,
-        CancellationToken cancellationToken = default)
-        where TRequest : IRequest
-        {
-            ReceivedToken = cancellationToken;
-            return Task.CompletedTask;
-        }
-
-        public Task<object?> Send(
-            object request,
-            CancellationToken cancellationToken = default) => Task.FromResult<object?>("Hello SimpleMediatR");
-    }
-
 
     [Fact]
     public async Task SendWithoutResponseShouldCompleteAsync()
     {
         // Arrange
-        ISender sender = new TestSender();
+        var sender = new TestSender();
         var request = new TestCommand();
 
         // Act
         await sender.Send(request);
 
         // Assert
-        Assert.True(true);
+        Assert.True(sender.WasHandled);
     }
-
-    private sealed record TestCommand : IRequest;
 
     [Fact]
     public async Task SendShouldForwardCancellationTokenAsync()
@@ -74,11 +46,6 @@ public sealed class SenderTests
         Assert.Equal(expectedToken, sender.ReceivedToken);
     }
 
-    public Task<object?> Send(
-        object request,
-        CancellationToken cancellationToken = default) => Task.FromResult<object?>(ObjectResponse);
-
-
     [Fact]
     public async Task SendObjectShouldReturnExpectedResultAsync()
     {
@@ -87,10 +54,41 @@ public sealed class SenderTests
         object request = new TestQuery();
 
         // Act
-        object? result = await sender.Send(request);
+        var result = await sender.Send(request);
 
         // Assert
         Assert.Equal("Hello SimpleMediatR", result);
     }
 
+    private sealed record TestQuery : IRequest<string>;
+
+    private sealed record TestCommand : IRequest;
+
+    private sealed class TestSender : ISender
+    {
+        public bool WasHandled { get; private set; }
+
+        public CancellationToken ReceivedToken { get; private set; }
+
+        public Task<TResponse> Send<TResponse>(
+            IRequest<TResponse> request,
+            CancellationToken cancellationToken = default)
+            => Task.FromResult((TResponse)(object)"Hello SimpleMediatR");
+
+        public Task Send<TRequest>(
+            TRequest request,
+            CancellationToken cancellationToken = default)
+            where TRequest : IRequest
+        {
+            WasHandled = true;
+            ReceivedToken = cancellationToken;
+
+            return Task.CompletedTask;
+        }
+
+        public Task<object?> Send(
+            object request,
+            CancellationToken cancellationToken = default)
+            => Task.FromResult<object?>("Hello SimpleMediatR");
+    }
 }
