@@ -1,6 +1,3 @@
-
-using SimpleMediatR;
-
 namespace SimpleMediatR.Tests.Abstractions;
 
 public sealed class RequestHandlerDelegateTests

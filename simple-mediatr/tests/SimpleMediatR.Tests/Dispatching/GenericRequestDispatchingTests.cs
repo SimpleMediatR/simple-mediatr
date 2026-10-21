@@ -1,6 +1,3 @@
-
-using SimpleMediatR;
-
 namespace SimpleMediatR.Tests.Dispatching;
 
 public sealed class GenericRequestDispatchingTests
