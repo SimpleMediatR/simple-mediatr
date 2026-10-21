@@ -1,6 +1,7 @@
 
 using System.Reflection;
 using System.Runtime.ExceptionServices;
+using SimpleMediatR.Internal;
 
 namespace SimpleMediatR;
 
@@ -12,8 +13,7 @@ namespace SimpleMediatR;
 /// </param>
 public sealed class SimpleMediator(IServiceProvider serviceProvider) : ISender
 {
-    private readonly IServiceProvider _serviceProvider = serviceProvider
-        ?? throw new ArgumentNullException(nameof(serviceProvider));
+    private readonly HandlerResolver _handlerResolver = new(serviceProvider);
 
     /// <inheritdoc />
     public Task<TResponse> Send<TResponse>(
@@ -27,9 +27,7 @@ public sealed class SimpleMediator(IServiceProvider serviceProvider) : ISender
         var handlerType = typeof(IRequestHandler<,>)
             .MakeGenericType(requestType, typeof(TResponse));
 
-        var handler = _serviceProvider.GetService(handlerType)
-            ?? throw new InvalidOperationException(
-                $"No handler registered for request type '{requestType.FullName}'.");
+        var handler = _handlerResolver.Resolve(request);
 
         var handleMethod = handlerType.GetMethod("Handle")
             ?? throw new InvalidOperationException(
@@ -62,9 +60,7 @@ public sealed class SimpleMediator(IServiceProvider serviceProvider) : ISender
         var handlerType = typeof(IRequestHandler<>)
             .MakeGenericType(requestType);
 
-        var handler = _serviceProvider.GetService(handlerType)
-            ?? throw new InvalidOperationException(
-                $"No handler registered for request type '{requestType.FullName}'.");
+        var handler = _handlerResolver.Resolve((IRequest)request);
 
         var handleMethod = handlerType.GetMethod("Handle")
             ?? throw new InvalidOperationException(
@@ -87,5 +83,6 @@ public sealed class SimpleMediator(IServiceProvider serviceProvider) : ISender
     /// <inheritdoc />
     public Task<object?> Send(
         object request,
-        CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        CancellationToken cancellationToken = default)
+        => throw new NotImplementedException();
 }
