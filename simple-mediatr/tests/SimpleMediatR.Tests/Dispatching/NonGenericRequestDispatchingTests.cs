@@ -156,13 +156,13 @@ public sealed class NonGenericRequestDispatchingTests
         // Arrange
         var handler = new DeleteUserCommandHandler();
         var serviceProvider = new TestServiceProvider(handler);
-        ISender sender = new SimpleMediator(serviceProvider);
+        var mediator = new SimpleMediator(serviceProvider);
 
         IRequest request = null!;
 
         Action act = () =>
         {
-            _ = sender.Send(request);
+            _ = mediator.Send(request);
         };
 
         // Act
