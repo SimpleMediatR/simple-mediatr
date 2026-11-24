@@ -241,3 +241,6 @@ end_of_line = lf
 [*.ps1]
 indent_style = space
 indent_size = 4
+
+# Preserve MediatR-compatible delegate naming
+dotnet_diagnostic.CA1711.severity = none

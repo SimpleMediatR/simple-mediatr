@@ -1,4 +1,6 @@
 
+using System.Collections.Concurrent;
+
 namespace SimpleMediatR.Internal;
 
 /// <summary>
@@ -6,6 +8,14 @@ namespace SimpleMediatR.Internal;
 /// </summary>
 internal sealed class HandlerResolver(IServiceProvider serviceProvider)
 {
+    private static readonly ConcurrentDictionary<
+        (Type RequestType, Type ResponseType),
+        Type> s_genericHandlerTypes = new();
+
+    private static readonly ConcurrentDictionary<
+        Type,
+        Type> s_nonGenericHandlerTypes = new();
+
     private readonly IServiceProvider _serviceProvider = serviceProvider
         ?? throw new ArgumentNullException(nameof(serviceProvider));
 
@@ -15,8 +25,10 @@ internal sealed class HandlerResolver(IServiceProvider serviceProvider)
 
         var requestType = request.GetType();
 
-        var handlerType = typeof(IRequestHandler<,>)
-            .MakeGenericType(requestType, typeof(TResponse));
+        var handlerType = s_genericHandlerTypes.GetOrAdd(
+            (requestType, typeof(TResponse)),
+            static key => typeof(IRequestHandler<,>)
+                .MakeGenericType(key.RequestType, key.ResponseType));
 
         return ResolveHandler(handlerType, requestType);
     }
@@ -27,8 +39,10 @@ internal sealed class HandlerResolver(IServiceProvider serviceProvider)
 
         var requestType = request.GetType();
 
-        var handlerType = typeof(IRequestHandler<>)
-            .MakeGenericType(requestType);
+        var handlerType = s_nonGenericHandlerTypes.GetOrAdd(
+            requestType,
+            static type => typeof(IRequestHandler<>)
+                .MakeGenericType(type));
 
         return ResolveHandler(handlerType, requestType);
     }
