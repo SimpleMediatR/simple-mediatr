@@ -6,4 +6,9 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="SimpleMediatR.Tests" />
+    <InternalsVisibleTo Include="SimpleMediatR.Benchmarks" />
+  </ItemGroup>
+
 </Project>

@@ -1,6 +1,4 @@
 
-using System.Reflection;
-using System.Runtime.ExceptionServices;
 using SimpleMediatR.Internal;
 
 namespace SimpleMediatR;
@@ -24,27 +22,13 @@ public sealed class SimpleMediator(IServiceProvider serviceProvider) : ISender
 
         var requestType = request.GetType();
 
-        var handlerType = typeof(IRequestHandler<,>)
-            .MakeGenericType(requestType, typeof(TResponse));
-
         var handler = _handlerResolver.Resolve(request);
 
-        var handleMethod = handlerType.GetMethod("Handle")
-            ?? throw new InvalidOperationException(
-                $"The handler '{handlerType.FullName}' does not contain a Handle method.");
+        var invoker = DispatcherCache.GetGenericInvoker(
+            requestType,
+            typeof(TResponse));
 
-        try
-        {
-            return (Task<TResponse>)handleMethod.Invoke(
-                handler,
-                [request, cancellationToken])!;
-        }
-        catch (TargetInvocationException exception)
-            when (exception.InnerException is not null)
-        {
-            ExceptionDispatchInfo.Capture(exception.InnerException).Throw();
-            throw;
-        }
+        return (Task<TResponse>)invoker(handler, request, cancellationToken);
     }
 
     /// <inheritdoc />
@@ -57,27 +41,11 @@ public sealed class SimpleMediator(IServiceProvider serviceProvider) : ISender
 
         var requestType = request.GetType();
 
-        var handlerType = typeof(IRequestHandler<>)
-            .MakeGenericType(requestType);
-
         var handler = _handlerResolver.Resolve((IRequest)request);
 
-        var handleMethod = handlerType.GetMethod("Handle")
-            ?? throw new InvalidOperationException(
-                $"The handler '{handlerType.FullName}' does not contain a Handle method.");
+        var invoker = DispatcherCache.GetNonGenericInvoker(requestType);
 
-        try
-        {
-            return (Task)handleMethod.Invoke(
-                handler,
-                [request, cancellationToken])!;
-        }
-        catch (TargetInvocationException exception)
-            when (exception.InnerException is not null)
-        {
-            ExceptionDispatchInfo.Capture(exception.InnerException).Throw();
-            throw;
-        }
+        return (Task)invoker(handler, request, cancellationToken);
     }
 
     /// <inheritdoc />

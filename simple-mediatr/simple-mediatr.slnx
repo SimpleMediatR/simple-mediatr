@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/benchmarks/">
+    <Project Path="SimpleMediatR.Benchmarks/SimpleMediatR.Benchmarks.csproj" Id="a3e264c6-d696-444f-847c-21c42600dc61" />
+  </Folder>
   <Folder Name="/Solution Items/">
     <File Path="Directory.Build.Props" />
   </Folder>
